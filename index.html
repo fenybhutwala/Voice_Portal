@@ -1,0 +1,689 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --brand:#1A3A6B;--brand-light:#2D5BE3;--brand-mid:#E8EFFF;--accent:#F0A500;
+    --surface:#fff;--surface2:#F5F7FC;--border:#DDE3F0;
+    --text:#0F1C35;--text2:#4A5778;--text3:#8B97B5;
+    --r:10px;--font:'DM Sans',sans-serif;
+  }
+  body{font-family:var(--font);background:var(--surface2);color:var(--text);font-size:14px;}
+  .app{min-height:600px;display:flex;flex-direction:column;}
+  .header{background:var(--brand);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+  .logo-text{color:#fff;font-size:15px;font-weight:600;letter-spacing:.3px;}
+  .logo-sub{color:rgba(255,255,255,.5);font-size:11px;margin-left:6px;}
+  .nav{display:flex;gap:4px;}
+  .nav-btn{background:transparent;border:none;cursor:pointer;padding:6px 14px;border-radius:6px;color:rgba(255,255,255,.6);font-size:12px;font-family:var(--font);font-weight:500;transition:all .15s;}
+  .nav-btn.active{background:rgba(255,255,255,.15);color:#fff;}
+  .nav-btn:hover:not(.active){background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);}
+  .view{display:none;padding:24px;}
+  .view.active{display:block;}
+  .emp-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;}
+  .card-title{font-size:13px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .card-title-dot{width:6px;height:6px;border-radius:50%;background:var(--brand-light);}
+  .field-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;}
+  .field{margin-bottom:14px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  select,input[type=text],input[type=password]{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;color:var(--text);background:var(--surface);outline:none;}
+  select:focus,input[type=text]:focus,input[type=password]:focus{border-color:var(--brand-light);}
+  .toggle-wrap{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:6px;cursor:pointer;border:1px solid var(--border);}
+  .toggle-label{font-size:12px;color:var(--text2);}
+  .toggle{width:34px;height:18px;border-radius:9px;background:#ccc;position:relative;cursor:pointer;transition:background .2s;}
+  .toggle.on{background:var(--brand-light);}
+  .toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .2s;}
+  .toggle.on::after{left:18px;}
+  textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;color:var(--text);resize:none;outline:none;line-height:1.6;}
+  textarea:focus{border-color:var(--brand-light);}
+  .submit-btn{width:100%;padding:11px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:4px;}
+  .submit-btn:hover{background:var(--brand-light);}
+  .submit-btn:disabled{background:#9BA8C0;cursor:not-allowed;}
+  .ai-badge{display:inline-flex;align-items:center;gap:5px;background:var(--brand-mid);color:var(--brand);border-radius:4px;padding:3px 8px;font-size:11px;font-weight:600;margin-bottom:12px;}
+  .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--brand-light);}
+  .ai-dot.pulse{animation:pulse 1.2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+  .ai-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  .ai-row:last-child{border-bottom:none;}
+  .ai-row-label{color:var(--text2);}
+  .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;}
+  .tag-green{background:#F0FAF4;color:#166534;}
+  .tag-amber{background:#FFFBEB;color:#92400E;}
+  .tag-red{background:#FFF0F0;color:#B91C1C;}
+  .tag-blue{background:var(--brand-mid);color:var(--brand);}
+  .tag-gray{background:#F1F3F7;color:var(--text2);}
+  .score-ring-wrap{display:flex;align-items:center;gap:12px;padding:10px 0;}
+  .score-circle{width:52px;height:52px;position:relative;flex-shrink:0;}
+  .score-circle svg{transform:rotate(-90deg);}
+  .score-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--brand);}
+  .score-meta{font-size:12px;color:var(--text2);line-height:1.6;}
+  .sent-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:4px;}
+  .sent-fill{height:100%;border-radius:3px;transition:width .5s;}
+  .skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--surface2) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:4px;height:12px;margin:6px 0;}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .api-key-banner{background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#92400E;}
+  .api-key-banner strong{display:block;margin-bottom:6px;font-size:13px;}
+  .api-key-input-row{display:flex;gap:8px;margin-top:8px;}
+  .api-key-input-row input{flex:1;}
+  .api-key-input-row button{padding:6px 12px;background:var(--brand);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--font);white-space:nowrap;}
+  .llm-insight{font-size:12px;color:var(--text2);line-height:1.6;padding:10px 0;border-bottom:1px solid var(--border);}
+  .llm-insight:last-child{border-bottom:none;}
+  .insight-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px;}
+  .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .dash-title{font-size:18px;font-weight:600;color:var(--text);}
+  .dash-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+  .metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+  .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+  .metric-val{font-size:26px;font-weight:600;color:var(--text);line-height:1;}
+  .metric-label{font-size:11px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;}
+  .metric-delta{font-size:11px;margin-top:6px;color:#166534;font-weight:500;}
+  .metric-delta.down{color:#B91C1C;}
+  .submissions-grid{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start;}
+  .sub-item{padding:14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;border-radius:6px;}
+  .sub-item:hover,.sub-item.sel{background:var(--surface2);}
+  .sub-item:last-child{border-bottom:none;}
+  .sub-row{display:flex;align-items:flex-start;gap:10px;}
+  .sub-sev{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+  .sev-high{background:#EF4444;}
+  .sev-med{background:#F59E0B;}
+  .sev-low{background:#22C55E;}
+  .sub-body{flex:1;}
+  .sub-name{font-size:13px;font-weight:500;color:var(--text);}
+  .sub-meta{font-size:11px;color:var(--text3);}
+  .sub-preview{font-size:12px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px;}
+  .action-btn{padding:5px 10px;border:1px solid var(--border);border-radius:5px;background:transparent;cursor:pointer;font-size:11px;font-family:var(--font);color:var(--text2);transition:all .15s;}
+  .action-btn:hover{background:var(--surface2);}
+  .action-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .action-btn.primary:hover{background:var(--brand-light);}
+  .detail-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;}
+  .detail-section{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+  .detail-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+  .detail-sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin-bottom:10px;}
+  .detail-body{font-size:13px;color:var(--text);line-height:1.7;}
+  .detail-meta-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;}
+  .detail-meta-row span:first-child{color:var(--text2);}
+  .detail-meta-row span:last-child{font-weight:500;color:var(--text);}
+  .trend-chart{display:flex;align-items:flex-end;gap:4px;height:60px;padding-top:8px;}
+  .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .bar{width:100%;border-radius:3px 3px 0 0;background:var(--brand-mid);}
+  .bar.highlight{background:var(--brand-light);}
+  .bar-label{font-size:9px;color:var(--text3);}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0F1C35;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
+  .toast.show{opacity:1;}
+  .error-msg{color:#B91C1C;font-size:12px;padding:8px 0;}
+  @media(max-width:700px){.emp-layout,.submissions-grid,.metrics-row{grid-template-columns:1fr;}}
+</style>
+
+<div class="app">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <span class="logo-text">Your Voice Matters</span>
+      <span class="logo-sub">Employee Voice Portal</span>
+    </div>
+    <div class="nav">
+      <button class="nav-btn active" onclick="switchView('employee')">Submit Concern</button>
+      <button class="nav-btn" onclick="switchView('ceo')">CEO Dashboard</button>
+    </div>
+  </div>
+
+  <!-- EMPLOYEE VIEW -->
+  <div class="view active" id="view-employee">
+    <div class="emp-layout">
+      <div>
+        <div class="api-key-banner" id="apiBanner">
+          <strong>Anthropic API key required for AI screening</strong>
+          Enter your key below — it stays in this browser session only and is never stored.
+          <div class="api-key-input-row">
+            <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+            <button onclick="saveApiKey()">Connect</button>
+          </div>
+          <div id="apiKeyStatus" style="margin-top:6px;font-size:11px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="card-title-dot"></div>Submit a Concern</div>
+          <div class="field">
+            <div class="field-label">Submission type</div>
+            <select id="cat">
+              <option value="">Select category...</option>
+              <option>Ethical issue</option>
+              <option>Workplace culture</option>
+              <option>Innovation idea</option>
+              <option>Process improvement</option>
+              <option>Safety concern</option>
+              <option>Leadership feedback</option>
+            </select>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <div class="field-label">Department</div>
+              <select id="dept">
+                <option value="">Select dept...</option>
+                <option>Engineering</option>
+                <option>Finance</option>
+                <option>HR</option>
+                <option>Operations</option>
+                <option>Sales</option>
+                <option>Marketing</option>
+                <option>Legal</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="field-label">Urgency</div>
+              <select id="urgency">
+                <option value="">Select...</option>
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">Your concern</div>
+            <textarea id="concern" rows="6" placeholder="Describe your concern in detail..." oninput="onConcernInput()"></textarea>
+          </div>
+          <div class="field">
+            <div class="toggle-wrap" onclick="toggleAnon()">
+              <div class="toggle on" id="anonToggle"></div>
+              <span class="toggle-label" id="anonLabel">Submit anonymously</span>
+            </div>
+          </div>
+          <button class="submit-btn" id="submitBtn" onclick="submitConcern()" disabled>Submit to CEO</button>
+        </div>
+      </div>
+
+      <!-- AI Panel -->
+      <div>
+        <div class="card" id="aiCard">
+          <div class="ai-badge"><div class="ai-dot" id="aiDot"></div>AI Screening — Claude</div>
+          <div id="aiPanel">
+            <div style="text-align:center;padding:20px 0;color:var(--text3);font-size:12px;">
+              Add your API key and start typing to see real AI analysis
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <div class="card-title"><div class="card-title-dot"></div>How it works</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="width:20px;height:20px;border-radius:50%;background:var(--brand-mid);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.5;">Submit with optional anonymity</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="width:20px;height:20px;border-radius:50%;background:var(--brand-mid);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.5;">Claude analyzes severity, sentiment, and recommends routing</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="width:20px;height:20px;border-radius:50%;background:var(--brand-mid);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.5;">Non-relevant queries filtered automatically</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="width:20px;height:20px;border-radius:50%;background:var(--brand-mid);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">4</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.5;">CEO reviews prioritized concerns on the dashboard</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CEO DASHBOARD -->
+  <div class="view" id="view-ceo">
+    <div class="dash-header">
+      <div>
+        <div class="dash-title">CEO Insight Dashboard</div>
+        <div class="dash-sub" id="dashSub">Last updated: Today, 10:24 AM</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <select style="font-size:12px;padding:6px 10px;width:auto;">
+          <option>Last 30 days</option>
+          <option>Last 7 days</option>
+          <option>Last quarter</option>
+        </select>
+        <button class="action-btn primary" style="font-size:12px;" onclick="showToast('Report exported')">Export report</button>
+      </div>
+    </div>
+    <div class="metrics-row">
+      <div class="metric"><div class="metric-val" id="mTotal">0</div><div class="metric-label">Total submissions</div><div class="metric-delta" id="mTotalD"></div></div>
+      <div class="metric"><div class="metric-val" style="color:#EF4444;" id="mHigh">0</div><div class="metric-label">High severity</div><div class="metric-delta down" id="mHighD"></div></div>
+      <div class="metric"><div class="metric-val" style="color:#22C55E;" id="mResolved">0</div><div class="metric-label">Resolved</div><div class="metric-delta" id="mResolvedD"></div></div>
+      <div class="metric"><div class="metric-val" id="mAnon">0</div><div class="metric-label">Anonymous</div><div class="metric-delta" id="mAnonD"></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div class="card"><div class="card-title"><div class="card-title-dot"></div>Submission trend</div><div class="trend-chart" id="trendChart"></div></div>
+      <div class="card"><div class="card-title"><div class="card-title-dot"></div>Category breakdown</div><div id="catBreakdown"></div></div>
+    </div>
+    <div class="card" style="padding:0;">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div class="card-title" style="margin-bottom:0;"><div class="card-title-dot"></div>Submissions</div>
+        <div style="display:flex;gap:6px;">
+          <select id="filterSev" style="font-size:11px;padding:4px 8px;width:auto;" onchange="renderSubmissions()">
+            <option value="">All severity</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+          <select id="filterCat" style="font-size:11px;padding:4px 8px;width:auto;" onchange="renderSubmissions()">
+            <option value="">All categories</option>
+            <option>Ethical issue</option>
+            <option>Workplace culture</option>
+            <option>Innovation idea</option>
+            <option>Safety concern</option>
+            <option>Leadership feedback</option>
+          </select>
+        </div>
+      </div>
+      <div class="submissions-grid" style="padding:12px;">
+        <div id="subList"></div>
+        <div id="detailPanel"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getFirestore, addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAFI1pnY6tmspDm3azElhhDvMLmSwRkHeo",
+    authDomain: "ceo-voice-portal.firebaseapp.com",
+    projectId: "ceo-voice-portal",
+    storageBucket: "ceo-voice-portal.firebasestorage.app",
+    messagingSenderId: "912738251809",
+    appId: "1:912738251809:web:cd105809ba0012cf1d1f60"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // expose helpers to the main script
+  window.db = db;
+  window.addDoc = addDoc;
+  window.collection = collection;
+  window.getDocs = getDocs;
+</script>
+
+
+<script>
+let apiKey = '';
+let anonOn = true;
+let analyzeTimer = null;
+let selectedSub = null;
+let lastAnalysis = null;
+
+// --- Load submissions from Firestore into the in-memory submissions[] array
+async function loadFromFirebase() {
+  try {
+    const querySnapshot = await window.getDocs(window.collection(window.db, "submissions"));
+
+    // clear existing demo data and replace with DB data
+    submissions.length = 0;
+
+    querySnapshot.forEach((doc) => {
+      const d = doc.data();
+      // Ensure id exists (Firestore doc id or timestamp)
+      if(!d.id) d.id = Date.now() + Math.floor(Math.random()*1000);
+      submissions.push(d);
+    });
+
+    renderDashboard();
+  } catch (err) {
+    console.error('Firestore load error', err);
+    showToast('Failed to load submissions (check console).');
+    // fallback to existing demo data (optional)
+    renderDashboard();
+  }
+}
+
+const submissions = [
+  {id:1,cat:'Ethical issue',dept:'Finance',severity:'High',sentimentScore:-0.7,sentimentLabel:'Negative',anon:true,date:'Apr 2',preview:'There appears to be systematic override of expense approval processes in Q1 reporting. Multiple team members have noticed discrepancies.',routed:'CEO (priority)',status:'Pending',score:92,tags:['urgent','financial'],summary:'Employee reports possible financial irregularities in expense reporting, suggesting systemic override of approval processes.',recommendation:'Requires immediate CEO attention and potential audit of Q1 Finance expense records.'},
+  {id:2,cat:'Workplace culture',dept:'Engineering',severity:'High',sentimentScore:-0.6,sentimentLabel:'Negative',anon:false,name:'R. Sharma',date:'Apr 1',preview:'The on-call rotation has become untenable. Engineers are being paged 4-5 times per night with no compensation or acknowledgment.',routed:'CEO + HR',status:'In review',score:88,tags:['burnout','culture'],summary:'Critical burnout risk in Engineering. On-call practices are unsustainable and causing significant team morale issues.',recommendation:'Review on-call policy with HR, consider rotation restructuring and compensation review.'},
+  {id:3,cat:'Safety concern',dept:'Operations',severity:'High',sentimentScore:-0.8,sentimentLabel:'Negative',anon:true,date:'Mar 31',preview:'Fire exit B on floor 3 has been blocked by equipment for two weeks. Maintenance tickets have been ignored.',routed:'CEO + Facilities',status:'Resolved',score:95,tags:['safety','urgent'],summary:'Immediate physical safety hazard — fire exit blocked for 2 weeks despite maintenance tickets.',recommendation:'Escalated to Facilities. Resolved. Recommend audit of all fire exits.'},
+  {id:4,cat:'Workplace culture',dept:'Sales',severity:'Medium',sentimentScore:-0.3,sentimentLabel:'Mixed',anon:true,date:'Mar 30',preview:'Quarterly targets were revised upward mid-quarter without communication to the team, creating significant morale issues.',routed:'HR',status:'Pending',score:61,tags:['morale'],summary:'Mid-quarter target changes without communication are negatively affecting Sales team morale and trust in leadership.',recommendation:'Sales leadership should communicate changes proactively. Consider team retrospective.'},
+  {id:5,cat:'Innovation idea',dept:'Engineering',severity:'Low',sentimentScore:0.8,sentimentLabel:'Positive',anon:false,name:'T. Mehta',date:'Mar 29',preview:'I have a proposal for reducing our AWS costs by approximately 30% through reserved instance optimization.',routed:'CTO',status:'Forwarded',score:72,tags:['innovation','cost-saving'],summary:'High-value cost optimization proposal for AWS infrastructure — estimated 30% cost reduction.',recommendation:'Forward to CTO and Cloud Infrastructure team for evaluation.'},
+];
+
+function saveApiKey(){
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if(!k.startsWith('sk-ant-') && !k.startsWith('sk-')){
+    document.getElementById('apiKeyStatus').innerHTML = '<span style="color:#B91C1C;">Invalid key format. Should start with sk-ant-</span>';
+    return;
+  }
+  apiKey = k;
+  document.getElementById('apiBanner').style.display = 'none';
+  document.getElementById('apiKeyStatus').innerHTML = '';
+  showToast('API key connected — AI screening active');
+  document.getElementById('aiDot').classList.add('pulse');
+}
+
+function toggleAnon(){
+  anonOn = !anonOn;
+  const t = document.getElementById('anonToggle');
+  const l = document.getElementById('anonLabel');
+  if(anonOn){t.classList.add('on');l.textContent='Submit anonymously';}
+  else{t.classList.remove('on');l.textContent='Submit with your name';}
+}
+
+function onConcernInput(){
+  const text = document.getElementById('concern').value.trim();
+  document.getElementById('submitBtn').disabled = text.length < 20;
+  clearTimeout(analyzeTimer);
+  if(!apiKey){
+    document.getElementById('aiPanel').innerHTML = '<div style="text-align:center;padding:20px 0;color:var(--text3);font-size:12px;">Add your API key above to enable AI screening</div>';
+    return;
+  }
+  if(text.length < 15){
+    document.getElementById('aiPanel').innerHTML = '<div style="text-align:center;padding:20px 0;color:var(--text3);font-size:12px;">Keep typing...</div>';
+    return;
+  }
+  showSkeletonLoader();
+  analyzeTimer = setTimeout(() => analyzeWithClaude(text), 900);
+}
+
+function showSkeletonLoader(){
+  document.getElementById('aiPanel').innerHTML = `
+    <div style="padding:8px 0;">
+      <div class="skeleton" style="width:60%;height:10px;"></div>
+      <div class="skeleton" style="width:90%;"></div>
+      <div class="skeleton" style="width:75%;"></div>
+      <div class="skeleton" style="width:50%;height:10px;margin-top:12px;"></div>
+      <div class="skeleton" style="width:85%;"></div>
+      <div class="skeleton" style="width:70%;"></div>
+    </div>
+  `;
+}
+
+async function analyzeWithClaude(text){
+  const cat = document.getElementById('cat').value || 'Not selected';
+  const dept = document.getElementById('dept').value || 'Not selected';
+  const urgency = document.getElementById('urgency').value || 'Not specified';
+
+  const prompt = `You are an AI screening system for a corporate employee voice portal. Analyze the following employee submission and respond ONLY with a valid JSON object — no markdown, no explanation, just JSON.
+
+Submission details:
+- Category: ${cat}
+- Department: ${dept}
+- Stated urgency: ${urgency}
+- Message: "${text}"
+
+Return this exact JSON structure:
+{
+  "severityScore": <integer 0-100>,
+  "severityLabel": "<Low|Medium|High>",
+  "sentimentScore": <float -1.0 to 1.0>,
+  "sentimentLabel": "<Positive|Neutral|Mixed|Negative>",
+  "relevance": "<Relevant|Likely relevant|Irrelevant>",
+  "routeTo": "<string: who this should go to, e.g. 'CEO', 'HR', 'CTO', 'CEO + HR'>",
+  "tags": [<2-4 short keyword strings>],
+  "summary": "<1-2 sentence neutral summary of the concern>",
+  "recommendation": "<1-2 sentence action recommendation for leadership>",
+  "filteredOut": <true if salary/personal/irrelevant, false otherwise>,
+  "filterReason": "<reason if filteredOut is true, else null>"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        messages: [{role: 'user', content: prompt}]
+      })
+    });
+
+    if(!res.ok){
+      const err = await res.json();
+      throw new Error(err.error?.message || 'API error ' + res.status);
+    }
+
+    const data = await res.json();
+    const raw = data.content.map(b => b.type === 'text' ? b.text : '').join('');
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const result = JSON.parse(clean);
+    lastAnalysis = result;
+    renderAIResult(result);
+  } catch(e) {
+    document.getElementById('aiPanel').innerHTML = `<div class="error-msg">AI screening error: ${e.message}</div>`;
+  }
+}
+
+function renderAIResult(r){
+  if(r.filteredOut){
+    document.getElementById('aiPanel').innerHTML = `
+      <div style="background:#FFF0F0;border:1px solid #FCA5A5;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:13px;font-weight:500;color:#B91C1C;margin-bottom:4px;">Submission filtered</div>
+        <div style="font-size:12px;color:#991B1B;">${r.filterReason}</div>
+      </div>
+    `;
+    document.getElementById('submitBtn').disabled = true;
+    return;
+  }
+
+  const sevClass = r.severityLabel==='High'?'tag-red':r.severityLabel==='Medium'?'tag-amber':'tag-green';
+  const sentColor = r.sentimentScore < -0.3 ? '#EF4444' : r.sentimentScore > 0.3 ? '#22C55E' : '#F59E0B';
+  const sentPct = Math.round((r.sentimentScore + 1) / 2 * 100);
+  const sc = Math.min(100, Math.max(0, Math.round(r.severityScore)));
+  const circum = 2 * Math.PI * 21;
+  const offset = circum * (1 - sc / 100);
+
+  document.getElementById('aiPanel').innerHTML = `
+    <div class="score-ring-wrap">
+      <div class="score-circle">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="21" fill="none" stroke="var(--border)" stroke-width="4"/>
+          <circle cx="26" cy="26" r="21" fill="none" stroke="var(--brand-light)" stroke-width="4"
+            stroke-dasharray="${circum.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round"/>
+        </svg>
+        <div class="score-val">${sc}</div>
+      </div>
+      <div class="score-meta">Severity score<br><span style="font-weight:500;color:var(--text);">${sc > 70 ? 'Prioritized for CEO review' : sc > 40 ? 'Standard routing applied' : 'Low urgency — logged'}</span></div>
+    </div>
+    <div class="ai-row"><span class="ai-row-label">Severity</span><span class="tag ${sevClass}">${r.severityLabel}</span></div>
+    <div class="ai-row"><span class="ai-row-label">Relevance</span><span class="tag ${r.relevance==='Relevant'?'tag-green':'tag-amber'}">${r.relevance}</span></div>
+    <div class="ai-row"><span class="ai-row-label">Route to</span><span class="tag tag-blue">${r.routeTo}</span></div>
+    <div class="ai-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+      <span class="ai-row-label">Sentiment — ${r.sentimentLabel}</span>
+      <div class="sent-bar" style="width:100%;"><div class="sent-fill" style="width:${sentPct}%;background:${sentColor};"></div></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;padding:8px 0;border-bottom:1px solid var(--border);">
+      ${(r.tags||[]).map(t=>`<span class="tag tag-blue" style="font-size:10px;">${t}</span>`).join('')}
+    </div>
+    <div class="llm-insight">
+      <div class="insight-label">Summary</div>
+      <div>${r.summary}</div>
+    </div>
+    <div class="llm-insight">
+      <div class="insight-label">Recommendation</div>
+      <div>${r.recommendation}</div>
+    </div>
+  `;
+  document.getElementById('submitBtn').disabled = false;
+}
+
+async function submitConcern(){
+  const text = document.getElementById('concern').value.trim();
+  if(!text || text.length < 20) return;
+
+  if(apiKey && lastAnalysis && !lastAnalysis.filteredOut){
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-IN',{month:'short',day:'numeric'});
+    const newSub = {
+      id: Date.now(),
+      cat: document.getElementById('cat').value || 'General',
+      dept: document.getElementById('dept').value || 'Unknown',
+      severity: lastAnalysis.severityLabel,
+      sentimentScore: lastAnalysis.sentimentScore,
+      sentimentLabel: lastAnalysis.sentimentLabel,
+      anon: anonOn,
+      date: dateStr,
+      preview: text,
+      routed: lastAnalysis.routeTo,
+      status: 'Pending',
+      score: lastAnalysis.severityScore,
+      tags: lastAnalysis.tags || [],
+      summary: lastAnalysis.summary,
+      recommendation: lastAnalysis.recommendation
+    };
+    submissions.unshift(newSub);
+await window.addDoc(window.collection(window.db, "submissions"), newSub);
+    updateMetrics();
+  }
+
+  showToast('Concern submitted securely' + (anonOn ? ' — anonymously' : ''));
+  setTimeout(()=>{
+    document.getElementById('concern').value = '';
+    document.getElementById('cat').value = '';
+    document.getElementById('dept').value = '';
+    document.getElementById('urgency').value = '';
+    document.getElementById('aiPanel').innerHTML = '<div style="text-align:center;padding:20px 0;color:var(--text3);font-size:12px;">Submitted. Start typing a new concern to analyze.</div>';
+    document.getElementById('submitBtn').disabled = true;
+    lastAnalysis = null;
+  }, 300);
+}
+
+function switchView(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-btn')[v==='employee'?0:1].classList.add('active');
+  if(v==='ceo'){loadFromFirebase();}
+}
+
+function updateMetrics(){
+  const total = submissions.length;
+  const high = submissions.filter(s=>s.severity==='High').length;
+  const resolved = submissions.filter(s=>s.status==='Resolved').length;
+  const anon = submissions.filter(s=>s.anon).length;
+  document.getElementById('mTotal').textContent = total;
+  document.getElementById('mTotalD').textContent = '+' + Math.min(total, 8) + ' this week';
+  document.getElementById('mHigh').textContent = high;
+  document.getElementById('mHighD').textContent = high + ' need attention';
+  document.getElementById('mResolved').textContent = resolved;
+  document.getElementById('mResolvedD').textContent = Math.round(resolved/total*100) + '% resolution rate';
+  document.getElementById('mAnon').textContent = anon;
+  document.getElementById('mAnonD').textContent = Math.round(anon/total*100) + '% anon rate';
+}
+
+function renderDashboard(){
+  updateMetrics();
+  renderTrend();
+  renderCatBreakdown();
+  renderSubmissions();
+}
+
+function renderTrend(){
+  const data=[3,5,2,7,4,8,6,9,5,11,7,13,10,submissions.length];
+  const max=Math.max(...data);
+  const days=['M','T','W','T','F','S','S','M','T','W','T','F','S','T'];
+  document.getElementById('trendChart').innerHTML=data.map((v,i)=>`
+    <div class="bar-wrap">
+      <div class="bar${i===data.length-1?' highlight':''}" style="height:${Math.round(v/max*48)}px;"></div>
+      <div class="bar-label">${days[i]}</div>
+    </div>`).join('');
+}
+
+function renderCatBreakdown(){
+  const counts={};
+  submissions.forEach(s=>{counts[s.cat]=(counts[s.cat]||0)+1;});
+  const total=submissions.length||1;
+  const colors={'Ethical issue':'#EF4444','Workplace culture':'#2D5BE3','Innovation idea':'#22C55E','Safety concern':'#F59E0B','Leadership feedback':'#8B5CF6','Process improvement':'#06B6D4','General':'#9BA8C0'};
+  document.getElementById('catBreakdown').innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([cat,n])=>`
+    <div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+        <span style="color:var(--text2);">${cat}</span>
+        <span style="font-weight:500;color:var(--text);">${n}</span>
+      </div>
+      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;width:${Math.round(n/total*100)}%;background:${colors[cat]||'#888'};border-radius:3px;"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderSubmissions(){
+  const sevF=document.getElementById('filterSev').value;
+  const catF=document.getElementById('filterCat').value;
+  let data=submissions.filter(s=>{
+    if(sevF&&s.severity!==sevF)return false;
+    if(catF&&s.cat!==catF)return false;
+    return true;
+  });
+  const el=document.getElementById('subList');
+  if(!data.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">No submissions match the filter</div>';document.getElementById('detailPanel').innerHTML='';return;}
+  el.innerHTML=data.map(s=>`
+    <div class="sub-item${selectedSub===s.id?' sel':''}" onclick="selectSub(${s.id}, event)">
+      <div class="sub-row">
+        <div class="sub-sev sev-${s.severity.toLowerCase()}"></div>
+        <div class="sub-body">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span class="sub-name">${s.anon?'Anonymous':(s.name||'Named employee')}</span>
+            <span class="tag ${s.status==='Resolved'?'tag-green':s.status==='In review'?'tag-amber':'tag-gray'}" style="font-size:10px;padding:1px 6px;">${s.status}</span>
+          </div>
+          <div class="sub-meta">${s.dept} · ${s.cat} · ${s.date}</div>
+          <div class="sub-preview">${s.preview}</div>
+        </div>
+      </div>
+    </div>`).join('');
+  if(selectedSub){const s=data.find(x=>x.id===selectedSub);if(s)showDetail(s);}
+}
+
+function selectSub(id, e){
+  selectedSub=id;
+  const s=submissions.find(x=>x.id===id);
+  document.querySelectorAll('.sub-item').forEach(el=>el.classList.remove('sel'));
+  if(e&&e.currentTarget)e.currentTarget.classList.add('sel');
+  showDetail(s);
+}
+
+function showDetail(s){
+  const sentColor=s.sentimentScore<-0.3?'#EF4444':s.sentimentScore>0.3?'#22C55E':'#F59E0B';
+  document.getElementById('detailPanel').innerHTML=`
+    <div class="detail-panel">
+      <div class="detail-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span class="tag ${s.severity==='High'?'tag-red':s.severity==='Medium'?'tag-amber':'tag-green'}">${s.severity} severity</span>
+          <span style="font-size:11px;color:var(--text3);">${s.date}</span>
+        </div>
+        <div class="detail-sec-title">Submission</div>
+        <div class="detail-body">${s.preview}</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-sec-title">AI analysis</div>
+        <div class="detail-meta-row"><span>Severity score</span><span>${Math.round(s.score)}/100</span></div>
+        <div class="detail-meta-row"><span>Sentiment</span><span style="color:${sentColor};">${s.sentimentLabel}</span></div>
+        <div class="detail-meta-row"><span>Routed to</span><span>${s.routed}</span></div>
+        <div class="detail-meta-row"><span>Category</span><span>${s.cat}</span></div>
+        ${s.tags&&s.tags.length?`<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">${s.tags.map(t=>`<span class="tag tag-blue" style="font-size:10px;">${t}</span>`).join('')}</div>`:''}
+        ${s.summary?`<div class="llm-insight" style="margin-top:10px;"><div class="insight-label">Summary</div><div>${s.summary}</div></div>`:''}
+        ${s.recommendation?`<div class="llm-insight"><div class="insight-label">Recommendation</div><div>${s.recommendation}</div></div>`:''}
+      </div>
+      <div class="detail-section">
+        <div class="detail-sec-title">Actions</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="action-btn primary" style="width:100%;font-size:12px;" onclick="showToast('Escalated — team notified')">Escalate to team</button>
+          <button class="action-btn" style="width:100%;font-size:12px;" onclick="showToast('Marked as resolved')">Mark resolved</button>
+          <button class="action-btn" style="width:100%;font-size:12px;" onclick="showToast('Response sent anonymously')">Send response</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+loadFromFirebase();
+</script>
+
