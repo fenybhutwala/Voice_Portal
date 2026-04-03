@@ -514,25 +514,25 @@ async function submitConcern(){
   const text = document.getElementById('concern').value.trim();
   if(!text || text.length < 20) return;
 
-  if(apiKey && lastAnalysis && !lastAnalysis.filteredOut){
+  if(true){
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-IN',{month:'short',day:'numeric'});
     const newSub = {
       id: Date.now(),
       cat: document.getElementById('cat').value || 'General',
       dept: document.getElementById('dept').value || 'Unknown',
-      severity: lastAnalysis.severityLabel,
-      sentimentScore: lastAnalysis.sentimentScore,
-      sentimentLabel: lastAnalysis.sentimentLabel,
+      severity: lastAnalysis?.severityLabel || "Medium",
+      sentimentScore: lastAnalysis?.sentimentScore || 0,
+      sentimentLabel: lastAnalysis?.sentimentLabel || "Neutral",
       anon: anonOn,
       date: dateStr,
       preview: text,
-      routed: lastAnalysis.routeTo,
+      routed: lastAnalysis?.routeTo || "CEO",
       status: 'Pending',
-      score: lastAnalysis.severityScore,
-      tags: lastAnalysis.tags || [],
-      summary: lastAnalysis.summary,
-      recommendation: lastAnalysis.recommendation
+      score: lastAnalysis?.severityScore || 50,
+      tags: lastAnalysis?.tags || [],
+      summary: lastAnalysis?.summary || text,
+      recommendation: lastAnalysis?.recommendation || "Review this submission"
     };
     submissions.unshift(newSub);
 await window.addDoc(window.collection(window.db, "submissions"), newSub);
