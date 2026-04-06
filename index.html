@@ -838,7 +838,7 @@ textarea.invalid{border-color:var(--orange)!important;}
    CONFIGURATION — Set your Anthropic API key here
 ────────────────────────────────────────────────────────────── */
 // const ANTHROPIC_API_KEY = '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';
-
+const GEMINI_API_KEY = "AIzaSyAj29nHGOIGL2GERBJVRiDBU4cXPTb7cB8";
 /* ──────────────────────────────────────────────────────────────
    STATE
 ────────────────────────────────────────────────────────────── */
@@ -935,7 +935,7 @@ function onConcernInput() {
     return;
   }
   showSkeletonLoader();
-  analyzeTimer = setTimeout(() => analyzeWithClaude(text), 900);
+  analyzeTimer = setTimeout(() => analyzeWithAI(text), 900);
 }
 
 function showSkeletonLoader() {
@@ -1033,7 +1033,8 @@ Return exactly this structure:
   }
 }
 */
-   
+
+/*   
 function analyzeWithClaude(text) {
   // Simple local logic instead of API
 
@@ -1067,7 +1068,78 @@ function analyzeWithClaude(text) {
   lastAnalysis = result;
   renderAIResult(result);
 }
-   
+*/   
+
+async function analyzeWithAI(text) {
+  const dept = document.getElementById('dept').value || 'Not specified';
+
+  const prompt = `
+You are an AI system for screening employee concerns.
+
+Analyze the following input and return ONLY valid JSON:
+
+{
+  "filteredOut": boolean,
+  "filterReason": "string or null",
+  "category": "Workplace Safety | Ethical Concern | Workplace Culture | Innovation Idea | Leadership & Management | Process Improvement | Harassment & Discrimination | Compliance & Legal",
+  "severityScore": 0-100,
+  "severityLabel": "Low | Medium | High",
+  "sentimentScore": -1 to 1,
+  "sentimentLabel": "Positive | Neutral | Mixed | Negative",
+  "relevance": "Relevant | Likely relevant | Not relevant",
+  "routeTo": "CEO | HR | Legal | CTO | CEO + HR | CEO + Legal",
+  "tags": ["keyword1","keyword2"],
+  "summary": "short summary",
+  "recommendation": "action suggestion"
+}
+
+FILTER OUT if:
+- salary / leave / HR admin requests
+- spam or meaningless input
+- abusive content
+
+INPUT:
+Department: ${dept}
+Text: "${text}"
+`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }]
+            }
+          ]
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    // Extract JSON safely
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("Invalid AI response");
+
+    const result = JSON.parse(match[0]);
+
+    lastAnalysis = result;
+    renderAIResult(result);
+
+  } catch (err) {
+    document.getElementById('aiPanel').innerHTML =
+      `<div class="error-msg">AI error: ${err.message}</div>`;
+  }
+}
 function renderAIResult(r) {
   if (r.filteredOut) {
     document.getElementById('submitBtn').disabled = true;
