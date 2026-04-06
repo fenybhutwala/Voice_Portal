@@ -1125,8 +1125,10 @@ Text: "${text}"
     const data = await res.json();
 
     const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-    // Extract JSON safely
+   
+     console.log("RAW AI RESPONSE:", raw);
+    
+     // Extract JSON safely
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("Invalid AI response");
 
