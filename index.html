@@ -1075,30 +1075,84 @@ async function analyzeWithAI(text) {
   const dept = document.getElementById('dept').value || 'Not specified';
 
   const prompt = `
-You are an AI system for screening employee concerns.
+You are an AI screening system for AdaniConneX's Employee Voice Portal.
 
-Analyze the following input and return ONLY valid JSON:
+This portal is meant ONLY for high-impact, strategic, or serious workplace concerns that deserve CEO visibility.
+
+Your job is to STRICTLY FILTER OUT trivial, low-impact, or routine issues.
+
+Return ONLY valid JSON.
+
+--------------------------------------------------
+
+FILTER OUT (filteredOut: true) IF:
+
+1. Routine HR/admin issues:
+   - Leave requests
+   - Salary/appraisal/bonus
+   - Expense claims, reimbursements
+   - Payslip issues
+   - Attendance or minor policy clarifications
+
+2. Minor interpersonal complaints:
+   - Small misunderstandings
+   - Communication preferences
+
+3. Low-impact operational inconveniences:
+   - Minor delays
+   - Small process annoyances
+   - Non-critical inefficiencies
+
+4. Issues that should be handled at:
+   - Team level
+   - Manager level
+   - HR helpdesk
+
+5. Vague or weak concerns:
+   - Not actionable
+   - No clear impact
+   - Very short or unclear input
+
+6. Non-serious or test inputs
+
+--------------------------------------------------
+
+ALLOW ONLY IF:
+
+- Impacts multiple employees or teams
+- Indicates systemic or cultural problems
+- Involves ethics, compliance, or legal risk
+- Suggests leadership or structural failure
+- Highlights safety risks
+- Provides strong innovation or transformation ideas
+- Shows repeated or escalated unresolved issues
+
+--------------------------------------------------
+
+INPUT:
+Department: ${dept}
+Text: "${text}"
+
+--------------------------------------------------
+
+RETURN EXACTLY:
 
 {
   "filteredOut": boolean,
-  "filterReason": "string or null",
+  "filterReason": "clear explanation if filtered, else null",
   "category": "Workplace Safety | Ethical Concern | Workplace Culture | Innovation Idea | Leadership & Management | Process Improvement | Harassment & Discrimination | Compliance & Legal",
-  "severityScore": 0-100,
+  "severityScore": number (0-100),
   "severityLabel": "Low | Medium | High",
-  "sentimentScore": -1 to 1,
+  "sentimentScore": number (-1 to 1),
   "sentimentLabel": "Positive | Neutral | Mixed | Negative",
   "relevance": "Relevant | Likely relevant | Not relevant",
   "routeTo": "CEO | HR | Legal | CTO | CEO + HR | CEO + Legal",
   "tags": ["keyword1","keyword2"],
-  "summary": "short summary",
-  "recommendation": "action suggestion"
+  "summary": "short executive summary",
+  "recommendation": "clear leadership action"
 }
-
-FILTER OUT if:
-- salary / leave / HR admin requests
-- spam or meaningless input
-- abusive content
-
+`;
+   
 INPUT:
 Department: ${dept}
 Text: "${text}"
