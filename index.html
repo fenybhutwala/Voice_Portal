@@ -1184,9 +1184,13 @@ function renderAIResult(r) {
         <div class="score-val">${sc}</div>
       </div>
       <div class="score-meta">Severity score<br>
-        <span style="font-weight:600;color:var(--text);">
-          ${sc>70?'Priority — CEO review':'${sc>40?\'Standard routing\':\'Low — logged\'}'}
-        </span>
+         <span style="font-weight:600;color:var(--text);">
+           ${sc > 70
+             ? 'Priority — CEO review'
+             : sc > 40
+               ? 'Standard routing'
+               : 'Low — logged'}
+         </span>
       </div>
     </div>
     <div class="ai-row"><span class="ai-row-label">Category (AI)</span><span class="tag tag-teal">${r.category}</span></div>
