@@ -838,7 +838,8 @@ textarea.invalid{border-color:var(--orange)!important;}
    CONFIGURATION — Set your Anthropic API key here
 ────────────────────────────────────────────────────────────── */
 // const ANTHROPIC_API_KEY = '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';
-const GEMINI_API_KEY = "AIzaSyAUp8pj6l7eWt3B1JltIMQrLGlo6EqHzMU";
+//const GEMINI_API_KEY = "AIzaSyAUp8pj6l7eWt3B1JltIMQrLGlo6EqHzMU";
+const GEMINI_API_KEY = prompt("Enter your Gemini API Key to test:");
 /* ──────────────────────────────────────────────────────────────
    STATE
 ────────────────────────────────────────────────────────────── */
@@ -1105,7 +1106,7 @@ Text: "${text}"
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAUp8pj6l7eWt3B1JltIMQrLGlo6EqHzMU`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {
