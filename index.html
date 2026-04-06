@@ -839,7 +839,14 @@ textarea.invalid{border-color:var(--orange)!important;}
 ────────────────────────────────────────────────────────────── */
 // const ANTHROPIC_API_KEY = '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';
 //const GEMINI_API_KEY = "AIzaSyAUp8pj6l7eWt3B1JltIMQrLGlo6EqHzMU";
-const GEMINI_API_KEY = prompt("Enter your Gemini API Key to test:");
+// 1. Try to get the key from the browser's temporary memory
+// 2. If it's not there, open the prompt
+const GEMINI_API_KEY = sessionStorage.getItem("gemini_test_key") || prompt("Enter your Gemini API Key to test:");
+
+// 3. Save whatever was entered into the temporary memory
+if (GEMINI_API_KEY) {
+  sessionStorage.setItem("gemini_test_key", GEMINI_API_KEY);
+}
 /* ──────────────────────────────────────────────────────────────
    STATE
 ────────────────────────────────────────────────────────────── */
