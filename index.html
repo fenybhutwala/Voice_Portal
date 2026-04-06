@@ -837,7 +837,7 @@ textarea.invalid{border-color:var(--orange)!important;}
 /* ──────────────────────────────────────────────────────────────
    CONFIGURATION — Set your Anthropic API key here
 ────────────────────────────────────────────────────────────── */
-const ANTHROPIC_API_KEY = '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';
+// const ANTHROPIC_API_KEY = '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';
 
 /* ──────────────────────────────────────────────────────────────
    STATE
@@ -953,7 +953,8 @@ function showSkeletonLoader() {
 /* ──────────────────────────────────────────────────────────────
    CLAUDE AI SCREENING
 ────────────────────────────────────────────────────────────── */
-async function analyzeWithClaude(text) {
+/*
+   async function analyzeWithClaude(text) {
   const dept = document.getElementById('dept').value || 'Not specified';
 
   const prompt = `You are an AI screening engine for AdaniConneX's secure Employee Voice Portal — a direct channel to the CEO for genuine workplace concerns.
@@ -1031,7 +1032,42 @@ Return exactly this structure:
       `<div class="error-msg">AI screening error: ${e.message}</div>`;
   }
 }
+*/
+   
+function analyzeWithClaude(text) {
+  // Simple local logic instead of API
 
+  const length = text.length;
+
+  let severity = "Low";
+  let score = 30;
+
+  if (length > 150) {
+    severity = "High";
+    score = 80;
+  } else if (length > 60) {
+    severity = "Medium";
+    score = 55;
+  }
+
+  const result = {
+    filteredOut: false,
+    category: "Workplace Culture",
+    severityScore: score,
+    severityLabel: severity,
+    sentimentScore: 0,
+    sentimentLabel: "Neutral",
+    relevance: "Relevant",
+    routeTo: "CEO",
+    tags: ["general"],
+    summary: text.substring(0, 100),
+    recommendation: "Review this submission"
+  };
+
+  lastAnalysis = result;
+  renderAIResult(result);
+}
+   
 function renderAIResult(r) {
   if (r.filteredOut) {
     document.getElementById('submitBtn').disabled = true;
