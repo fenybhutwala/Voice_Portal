@@ -1081,17 +1081,30 @@ function analyzeWithClaude(text) {
 async function analyzeWithAI(text) {
   const dept = document.getElementById('dept').value || 'Not specified';
 
-  const prompt = `
-You are an AI screening system for AdaniConneX's Employee Voice Portal.
-
+   const prompt = `
+You are an AI system for screening employee concerns. 
 This portal is meant ONLY for high-impact, strategic, or serious workplace concerns that deserve CEO visibility.
 
 Your job is to STRICTLY FILTER OUT trivial, low-impact, or routine issues.
 
 Return ONLY valid JSON.
 
---------------------------------------------------
+Analyze the following input and return ONLY valid JSON:
 
+{
+  "filteredOut": boolean,
+  "filterReason": "string or null",
+  "category": "Workplace Safety | Ethical Concern | Workplace Culture | Innovation Idea | Leadership & Management | Process Improvement | Harassment & Discrimination | Compliance & Legal",
+  "severityScore": 0-100,
+  "severityLabel": "Low | Medium | High",
+  "sentimentScore": -1 to 1,
+  "sentimentLabel": "Positive | Neutral | Mixed | Negative",
+  "relevance": "Relevant | Likely relevant | Not relevant",
+  "routeTo": "CEO | HR | Legal | CTO | CEO + HR | CEO + Legal",
+  "tags": ["keyword1","keyword2"],
+  "summary": "short summary",
+  "recommendation": "action suggestion"
+}
 FILTER OUT (filteredOut: true) IF:
 
 1. Routine HR/admin issues:
@@ -1104,6 +1117,8 @@ FILTER OUT (filteredOut: true) IF:
 2. Minor interpersonal complaints:
    - Small misunderstandings
    - Communication preferences
+   - "Manager didn't include me in meeting"
+   - "Someone didn’t reply to email"
 
 3. Low-impact operational inconveniences:
    - Minor delays
@@ -1139,32 +1154,8 @@ ALLOW ONLY IF:
 INPUT:
 Department: ${dept}
 Text: "${text}"
-
---------------------------------------------------
-
-RETURN EXACTLY:
-
-{
-  "filteredOut": boolean,
-  "filterReason": "clear explanation if filtered, else null",
-  "category": "Workplace Safety | Ethical Concern | Workplace Culture | Innovation Idea | Leadership & Management | Process Improvement | Harassment & Discrimination | Compliance & Legal",
-  "severityScore": number (0-100),
-  "severityLabel": "Low | Medium | High",
-  "sentimentScore": number (-1 to 1),
-  "sentimentLabel": "Positive | Neutral | Mixed | Negative",
-  "relevance": "Relevant | Likely relevant | Not relevant",
-  "routeTo": "CEO | HR | Legal | CTO | CEO + HR | CEO + Legal",
-  "tags": ["keyword1","keyword2"],
-  "summary": "short executive summary",
-  "recommendation": "clear leadership action"
-}
 `;
    
-/*INPUT:
-Department: ${dept}
-Text: "${text}"
-`;*/
-
   try {
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
