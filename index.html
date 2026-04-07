@@ -1061,8 +1061,7 @@ function sendEscalation(){
   const sub=encodeURIComponent(`[ACX Voice Portal] Escalation: ${s.cat||'Concern'} — ${s.severity||'Medium'} Priority`);
   const lines=['Dear Team,','','A concern from the AdaniConneX Employee Voice Portal has been escalated for your review.','',`Category: ${s.cat||'—'}`,`Department: ${s.dept||'—'}`,`Severity: ${s.severity||'—'} (Score: ${Math.round(s.score||0)}/100)`,`Submitted: ${s.date||'—'}`,`Route: ${s.routed||'—'}`,'','— AI Summary —',s.summary||s.preview||'—','','— Recommended Action —',s.recommendation||'—'];
   if(note)lines.push('','— CEO Note —',note);lines.push('','—','AdaniConneX Employee Voice Portal | Confidential');
-  window.open(`mailto:${to}?subject=${sub}&body=${encodeURIComponent(lines.join('
-'))}`,'_blank');
+  window.open(`mailto:${to}?subject=${sub}&body=${encodeURIComponent(lines.join(''))}`,'_blank'); /* change done here */
   closeModals();showToast(`Escalation email opened for ${selectedTeamIdxs.size} recipient(s)`);
 }
 function openResponseModal(subId){
