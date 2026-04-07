@@ -790,6 +790,15 @@ function logout(){
 
   document.getElementById('loginEmail').value = '';
   document.getElementById('loginPassword').value = '';
+
+  // ✅ CLEAR LOGIN MESSAGE (THIS FIXES YOUR ISSUE)
+  const msg = document.getElementById('loginMsg');
+  msg.textContent = '';
+  msg.className = 'login-msg';
+
+  // ✅ ALSO RESET BUTTON STATE (important)
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = false;
 }  
 
 /* ─── ROUTING ──────────────────────────────── */
