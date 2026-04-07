@@ -1061,7 +1061,7 @@ function sendEscalation(){
   const sub=encodeURIComponent(`[ACX Voice Portal] Escalation: ${s.cat||'Concern'} — ${s.severity||'Medium'} Priority`);
   const lines=['Dear Team,','','A concern from the AdaniConneX Employee Voice Portal has been escalated for your review.','',`Category: ${s.cat||'—'}`,`Department: ${s.dept||'—'}`,`Severity: ${s.severity||'—'} (Score: ${Math.round(s.score||0)}/100)`,`Submitted: ${s.date||'—'}`,`Route: ${s.routed||'—'}`,'','— AI Summary —',s.summary||s.preview||'—','','— Recommended Action —',s.recommendation||'—'];
   if(note)lines.push('','— CEO Note —',note);lines.push('','—','AdaniConneX Employee Voice Portal | Confidential');
-  window.open(`mailto:${to}?subject=${sub}&body=${encodeURIComponent(lines.join(''))}`,'_blank'); /* change done here */
+  window.open(`mailto:${to}?subject=${sub}&body=${encodeURIComponent(lines.join('\n'))}`,'_blank'); /* change done here */
   closeModals();showToast(`Escalation email opened for ${selectedTeamIdxs.size} recipient(s)`);
 }
 function openResponseModal(subId){
@@ -1091,8 +1091,7 @@ function exportReport(){
   if(!submissions.length){showToast('No submissions to export');return;}
   const h=['Date','Timestamp','Category','Department','Severity','Status','Confidential','Employee ID','Routed To','Score','Sentiment','Summary','Recommendation','Response Sent'];
   const rows=submissions.map(s=>[s.date||'—',s.timestamp||'—',s.cat||'—',s.dept||'—',s.severity||'—',s.status||'—',(s.confidential||s.anon)?'Yes':'No',(s.confidential||s.anon)?'[Hidden]':(s.empId||'—'),s.routed||'—',Math.round(s.score||0),s.sentimentLabel||'—','"'+(s.summary||'').replace(/"/g,'""')+'"','"'+(s.recommendation||'').replace(/"/g,'""')+'"',s.ceResponse?'Yes':'No']);
-  const csv=[h.join(','),...rows.map(r=>r.join(','))].join('
-');
+  const csv=[h.join(','),...rows.map(r=>r.join(','))].join('\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`acx-portal-${new Date().toISOString().split('T')[0]}.csv`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
   showToast('CSV report downloaded');
