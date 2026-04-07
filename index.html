@@ -772,12 +772,18 @@ function enterPortal(user){
   } else if(user.role==='ceo'){
     addNav(nav,'Dashboard','ceo');switchView('ceo');loadFromFirebase();
   } else {
-    addNav(nav,'Submit Concern','employee');
-    document.getElementById('notifBell').style.display='block';
-    switchView('employee');
-    document.getElementById('empEmail').value=user.email;
-    loadUserNotifs(user.email);
-  }
+  addNav(nav,'Submit Concern','employee');
+  document.getElementById('notifBell').style.display='block';
+  switchView('employee');
+
+  // ✅ AUTO-FILL USER DETAILS
+  document.getElementById('empEmail').value = user.email || '';
+  document.getElementById('empName').value = user.name || '';
+  document.getElementById('empId').value = user.employeeId || '';
+  document.getElementById('dept').value = user.department || '';
+
+  loadUserNotifs(user.email);
+}
 }
 function addNav(container,label,view){
   const btn=document.createElement('button');btn.className='nav-btn';btn.textContent=label;
