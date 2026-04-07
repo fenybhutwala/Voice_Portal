@@ -34,6 +34,11 @@ body{font-family:var(--font);background:var(--surface2);color:var(--text);font-s
   box-shadow:0 2px 12px rgba(12,27,51,.25);
 }
 .hdr-left{display:flex;align-items:center;gap:12px;}
+.hdr-logo-left {
+  height: 28px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);  /* 👈 ADD THIS */
+}
 .hdr-portal{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:500;color:rgba(255,255,255,.9);letter-spacing:.3px;}
 .hdr-right{display:flex;align-items:center;gap:10px;}
 .hdr-logo{height:32px;object-fit:contain;filter:brightness(0) invert(1);opacity:.92;}
