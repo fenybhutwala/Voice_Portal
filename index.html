@@ -636,7 +636,7 @@ document.addEventListener('fb-ready',()=>{loadRoles();loadTeam();});
 async function loadRoles(){
   if(!window._fb)return;
   try{
-    const snap=await window._fb.getDocs(window._fb.collection(window._fb.db,'roles'));
+    const snap=await window._fb.getDocs(window._fb.collection(window._fb.db,'users'));
     roles=[];
     snap.forEach(d=>roles.push({...d.data(),id:d.id}));
     renderRoleList();
@@ -1122,15 +1122,15 @@ async function saveRole(){
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showToast('Invalid email');return;}
   if(window._fb){
     try{
-      if(editingRoleId){await window._fb.updateDoc(window._fb.doc(window._fb.db,'roles',editingRoleId),{email,role});const idx=roles.findIndex(r=>r.id===editingRoleId);if(idx>=0)roles[idx]={...roles[idx],email,role};}
-      else{const ref=await window._fb.addDoc(window._fb.collection(window._fb.db,'roles'),{email,role});roles.push({id:ref.id,email,role});}
+      if(editingRoleId){await window._fb.updateDoc(window._fb.doc(window._fb.db,'users',editingRoleId),{email,role});const idx=roles.findIndex(r=>r.id===editingRoleId);if(idx>=0)roles[idx]={...roles[idx],email,role};}
+      else{const ref=await window._fb.addDoc(window._fb.collection(window._fb.db,'users'),{email,role});roles.push({id:ref.id,email,role});}
     }catch(e){showToast('DB error: '+e.message);return;}
   }else{if(editingRoleId){const idx=roles.findIndex(r=>r.id===editingRoleId);if(idx>=0)roles[idx]={...roles[idx],email,role};}else roles.push({id:String(Date.now()),email,role});}
   closeModals();renderRoleList();showToast('Role saved');
 }
 async function deleteRole(id){
   if(!confirm('Remove this role?'))return;
-  if(window._fb)try{await window._fb.deleteDoc(window._fb.doc(window._fb.db,'roles',id));}catch(e){showToast('Error');return;}
+  if(window._fb)try{await window._fb.deleteDoc(window._fb.doc(window._fb.db,'users',id));}catch(e){showToast('Error');return;}
   roles=roles.filter(r=>r.id!==id);renderRoleList();showToast('Role removed');
 }
 function renderTeamMgmt(){
