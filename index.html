@@ -387,7 +387,7 @@ textarea.invalid{border-color:var(--orange)!important;}
   <div class="view" id="view-employee">
     <div class="emp-sub-nav">
       <button class="emp-sub-btn active" id="empBtnSubmit" onclick="switchEmpPane('submit')">Submit Concern</button>
-      <button class="emp-sub-btn" id="empBtnHistory" onclick="switchEmpPane('history')">My Submissions<span class="cnt" id="histCount">0</span></button>
+      <button class="emp-sub-btn" id="empBtnHistory" onclick="switchEmpPane('history')">My Queries<span class="cnt" id="histCount">0</span></button>
       <button class="emp-sub-btn" id="empBtnNotifs" onclick="switchEmpPane('notifs')">Notifications<span class="cnt cnt-notif" id="notifCount" style="display:none;"></span></button>
     </div>
 
@@ -960,7 +960,7 @@ async function submitConcern(){
 function lsKey(id,email){return ('acx_'+id+'_'+email).toLowerCase().replace(/[^a-z0-9_]/g,'_');}
 function saveToLocalHistory(id,email,sub){try{const k=lsKey(id,email);const a=JSON.parse(localStorage.getItem(k)||'[]');a.unshift({id:sub.id,firestoreId:sub.firestoreId,date:sub.date,timestamp:sub.timestamp,cat:sub.cat,severity:sub.severity,concern:sub.concern,status:sub.status,confidential:sub.confidential,ceResponse:null});localStorage.setItem(k,JSON.stringify(a.slice(0,50)));}catch(e){}}
 function refreshHistCount(id,email){try{const a=JSON.parse(localStorage.getItem(lsKey(id,email))||'[]');document.getElementById('histCount').textContent=a.length;}catch(e){}}
-function renderHistoryEmpty(){document.getElementById('historyList').innerHTML='<div class="history-empty"><div class="history-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--b3)" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><div class="history-empty-title">Enter your Employee ID &amp; Email</div><div class="history-empty-sub">Your previous queries will appear here.</div></div>';}
+function renderHistoryEmpty(){document.getElementById('historyList').innerHTML='<div class="history-empty"><div class="history-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--b3)" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><div class="history-empty-sub">Your previous queries will appear here.</div></div>';}
 
 /*async function loadHistory(){
    const empId=document.getElementById('lookupId').value.trim();
