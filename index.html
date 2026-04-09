@@ -456,11 +456,11 @@ textarea.invalid{border-color:var(--orange)!important;}
 
     <!-- History pane -->
     <div class="emp-pane" id="empPaneHistory">
-      <div class="lookup-bar">
+     <!-- <div class="lookup-bar">
         <div style="flex:1;"><label for="lookupId">Employee ID</label><input type="text" id="lookupId" placeholder="ACX-1042"/></div>
         <div style="flex:1;"><label for="lookupEmail">Email Address</label><input type="email" id="lookupEmail" placeholder="you@adaniconnex.com"/></div>
         <button class="lookup-btn" onclick="loadHistory()">View My Submissions</button>
-      </div>
+      </div> -->
       <div id="historyList"></div>
     </div>
 
@@ -783,6 +783,7 @@ function enterPortal(user){
   document.getElementById('dept').value = user.department || '';
 
   loadUserNotifs(user.email);
+  loadHistory();
 }
 }
 function addNav(container,label,view){
@@ -833,7 +834,8 @@ function switchEmpPane(pane){
   const p=document.getElementById('empPane'+pane[0].toUpperCase()+pane.slice(1));
   const b=document.getElementById('empBtn'+pane[0].toUpperCase()+pane.slice(1));
   if(p)p.classList.add('active');if(b)b.classList.add('active');
-  if(pane==='history')renderHistoryEmpty();
+  // if(pane==='history')renderHistoryEmpty();
+  if (pane === 'history') loadHistory();
   if(pane==='notifs'){markNotifsRead();renderEmpNotifs();}
 }
 
@@ -948,7 +950,7 @@ async function submitConcern(){
     ['empName','empId','concern','dept'].forEach(id=>{const el=document.getElementById(id);el.value='';el.classList.remove('invalid');});
     document.getElementById('empEmail').value=currentUser?.email||'';
     ['errName','errId','errEmail','errDept','errConcern'].forEach(id=>document.getElementById(id).style.display='none');
-    document.getElementById('aiPanel').innerHTML='<div style="text-align:center;padding:28px 12px;color:var(--text3);font-size:12px;line-height:1.9;">Submitted! Track it under<br><strong style="color:var(--b1);">"My Submissions"</strong></div>';
+    document.getElementById('aiPanel').innerHTML='<div style="text-align:center;padding:28px 12px;color:var(--text3);font-size:12px;line-height:1.9;">Submitted! Track it under<br><strong style="color:var(--b1);">"My Queries"</strong></div>';
     btn.textContent='Submit to CEO';isConfidential=false;document.getElementById('confToggle').classList.remove('active');lastAnalysis=null;
     refreshHistCount(newSub.empId,newSub.email);
   },400);
@@ -958,10 +960,11 @@ async function submitConcern(){
 function lsKey(id,email){return ('acx_'+id+'_'+email).toLowerCase().replace(/[^a-z0-9_]/g,'_');}
 function saveToLocalHistory(id,email,sub){try{const k=lsKey(id,email);const a=JSON.parse(localStorage.getItem(k)||'[]');a.unshift({id:sub.id,firestoreId:sub.firestoreId,date:sub.date,timestamp:sub.timestamp,cat:sub.cat,severity:sub.severity,concern:sub.concern,status:sub.status,confidential:sub.confidential,ceResponse:null});localStorage.setItem(k,JSON.stringify(a.slice(0,50)));}catch(e){}}
 function refreshHistCount(id,email){try{const a=JSON.parse(localStorage.getItem(lsKey(id,email))||'[]');document.getElementById('histCount').textContent=a.length;}catch(e){}}
-function renderHistoryEmpty(){document.getElementById('historyList').innerHTML='<div class="history-empty"><div class="history-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--b3)" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><div class="history-empty-title">Enter your Employee ID &amp; Email</div><div class="history-empty-sub">Your previous submissions will appear here.</div></div>';}
-async function loadHistory(){
-  const empId=document.getElementById('lookupId').value.trim();
-  const email=document.getElementById('lookupEmail').value.trim();
+function renderHistoryEmpty(){document.getElementById('historyList').innerHTML='<div class="history-empty"><div class="history-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--b3)" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div><div class="history-empty-title">Enter your Employee ID &amp; Email</div><div class="history-empty-sub">Your previous queries will appear here.</div></div>';}
+
+/*async function loadHistory(){
+   const empId=document.getElementById('lookupId').value.trim();
+  const email=document.getElementById('lookupEmail').value.trim(); 
   if(!empId||!email){showToast('Enter both Employee ID and email');return;}
   const k=lsKey(empId,email);let local=[];
   try{local=JSON.parse(localStorage.getItem(k)||'[]');}catch(e){}
@@ -969,12 +972,92 @@ async function loadHistory(){
   if(window._fb){try{const snap=await window._fb.getDocs(window._fb.collection(window._fb.db,'submissions'));snap.forEach(d=>{const dd=d.data();if(dd.empId===empId&&dd.email===email)fire.push({...dd,id:d.id,firestoreId:d.id});});}catch(e){}}
   const merged={};local.forEach(s=>{merged[s.id||s.timestamp]={...s};});fire.forEach(s=>{merged[s.id]={...merged[s.id],...s};});
   const results=Object.values(merged).sort((a,b)=>(b.timestamp||'').localeCompare(a.timestamp||''));
-  if(!results.length){document.getElementById('historyList').innerHTML='<div class="history-empty"><div class="history-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--b3)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg></div><div class="history-empty-title">No submissions found</div><div class="history-empty-sub">No submissions for ID <strong>'+empId+'</strong>.</div></div>';return;}
+  if(!results.length){document.getElementById('historyList').innerHTML='<div class="history-empty"><div class="history-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--b3)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg></div><div class="history-empty-title">No query submissions found</div><div class="history-empty-sub">No query submissions for ID <strong>'+empId+'</strong>.</div></div>';return;}
   try{localStorage.setItem(k,JSON.stringify(results.slice(0,50)));document.getElementById('histCount').textContent=results.length;}catch(e){}
   document.getElementById('historyList').innerHTML=results.map(s=>{
     const sev=(s.severity||'low').toLowerCase();const sc=sev==='high'?'#EF4444':sev==='medium'?'#F59E0B':'#00B16B';
     const isConf=s.confidential||s.anon;
     return `<div class="hist-item"><div class="hist-header"><div><div class="hist-cat">${s.cat||'—'}</div><div class="hist-date">${s.date||'—'}</div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><span style="width:8px;height:8px;border-radius:50%;background:${sc};display:inline-block;"></span><span style="font-size:11px;color:${sc};font-weight:500;">${s.severity||'—'}</span>${isConf?'<span class="conf-badge">Confidential</span>':''}<span class="tag ${s.status==='Resolved'?'tag-green':'tag-gray'}">${s.status}</span></div></div><div class="hist-preview">${s.concern||s.preview||'—'}</div><div style="display:flex;gap:8px;align-items:center;"><div style="width:4px;height:4px;border-radius:50%;background:${CAT_COLORS[s.cat]||'#888'};"></div><span style="font-size:11px;color:var(--text3);">Ref: ${s.id?s.id.slice(-8):'—'}</span></div>${s.ceResponse?`<div class="hist-response"><div class="hist-response-label">CEO Response</div><div>${s.ceResponse}</div></div>`:''}</div>`;
+  }).join('');
+}*/
+  async function loadHistory() {
+  if (!currentUser) {
+    showToast("User not logged in");
+    return;
+  }
+
+  const empId = currentUser.employeeId;
+  const email = currentUser.email;
+
+  let results = [];
+
+  // 🔥 Fetch from Firebase
+  if (window._fb) {
+    try {
+      const snap = await window._fb.getDocs(
+        window._fb.collection(window._fb.db, 'submissions')
+      );
+
+      snap.forEach(d => {
+        const data = d.data();
+        if (data.empId === empId && data.email === email) {
+          results.push({ ...data, id: d.id });
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      showToast("Error loading history");
+    }
+  }
+
+  // 🔽 Sort latest first
+  results.sort((a, b) =>
+    (b.timestamp || '').localeCompare(a.timestamp || '')
+  );
+
+  if (!results.length) {
+    document.getElementById('historyList').innerHTML = `
+      <div class="history-empty">
+        <div class="history-empty-title">No query submissions yet</div>
+        <div class="history-empty-sub">
+          You haven’t submitted any concerns yet.
+        </div>
+      </div>`;
+    return;
+  }
+
+  // 🔥 Render same as before
+  document.getElementById('historyList').innerHTML = results.map(s => {
+    const sev = (s.severity || 'low').toLowerCase();
+    const sc = sev === 'high' ? '#EF4444' :
+               sev === 'medium' ? '#F59E0B' : '#00B16B';
+
+    const isConf = s.confidential || s.anon;
+
+    return `
+      <div class="hist-item">
+        <div class="hist-header">
+          <div>
+            <div class="hist-cat">${s.cat || '—'}</div>
+            <div class="hist-date">${s.date || '—'}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="width:8px;height:8px;border-radius:50%;background:${sc};"></span>
+            <span style="font-size:11px;color:${sc};">${s.severity}</span>
+            ${isConf ? '<span class="conf-badge">Confidential</span>' : ''}
+            <span class="tag ${s.status === 'Resolved' ? 'tag-green' : 'tag-gray'}">${s.status}</span>
+          </div>
+        </div>
+
+        <div class="hist-preview">${s.concern}</div>
+
+        ${s.ceResponse ? `
+          <div class="hist-response">
+            <div class="hist-response-label">CEO Response</div>
+            <div>${s.ceResponse}</div>
+          </div>` : ''}
+      </div>
+    `;
   }).join('');
 }
 
