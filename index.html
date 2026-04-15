@@ -612,8 +612,8 @@ document.dispatchEvent(new CustomEvent('fb-ready'));
 
 <!-- ═══ MAIN SCRIPT ════════════════════════════════════════ -->
 <script>
-const GEMINI_KEY = sessionStorage.getItem('gk') || prompt('Enter Gemini API Key:');
-if(GEMINI_KEY) sessionStorage.setItem('gk', GEMINI_KEY);
+/* const GEMINI_KEY = sessionStorage.getItem('gk') || prompt('Enter Gemini API Key:');
+if(GEMINI_KEY) sessionStorage.setItem('gk', GEMINI_KEY); */
 
 const CAT_COLORS={'Workplace Safety':'#EF4444','Ethical Concern':'#F59E0B','Workplace Culture':'#2A6091','Innovation Idea':'#00B16B','Leadership & Management':'#8E278F','Process Improvement':'#009AD7','Harassment & Discrimination':'#F04C23','Compliance & Legal':'#44B8B9'};
 
@@ -636,7 +636,29 @@ const DEFAULT_TEAM=[
 teamMembers=[...DEFAULT_TEAM];
 
 /* ─── FIREBASE ─────────────────────────────── */
-document.addEventListener('fb-ready',()=>{loadRoles();loadTeam();});
+
+  async function loadApiKey() {
+  try {
+    const snap = await window._fb.getDocs(
+      window._fb.collection(window._fb.db, "API_Details")
+    );
+
+    snap.forEach(doc => {
+      const data = doc.data();
+
+      if (data["API Key"]) {
+        window.GEMINI_KEY = data["API Key"];
+      }
+    });
+
+    console.log("API Key loaded");
+
+  } catch (e) {
+    console.error("Error loading API key", e);
+  }
+}
+  
+document.addEventListener('fb-ready',()=>{loadRoles();loadTeam();loadApiKey(); });
 
 async function loadRoles(){
   if(!window._fb)return;
@@ -873,7 +895,21 @@ CATEGORIES (pick one): "Workplace Safety","Ethical Concern","Workplace Culture",
 
 Return: {"filteredOut":bool,"filterReason":"string or null","category":"...","severityScore":0-100,"severityLabel":"Low|Medium|High","sentimentScore":-1to1,"sentimentLabel":"Positive|Neutral|Mixed|Negative","relevance":"Relevant|Likely relevant","routeTo":"CEO|HR|CTO|Legal|CEO + HR|CEO + Legal","tags":["k1","k2"],"summary":"1-2 sentences","recommendation":"1-2 sentences"}`;
   try{
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}]})});
+    const key = window.GEMINI_KEY;
+    if (!key) {
+      console.error("API key not loaded yet");
+      return;
+    }
+    
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents:[{ role:'user', parts:[{ text: prompt }] }] })
+      }
+    );
+    // const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}]})});
     const data=await res.json();
     const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     const m=raw.match(/\{[\s\S]*\}/);if(!m)throw new Error('Invalid AI response');
