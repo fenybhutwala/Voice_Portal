@@ -305,6 +305,34 @@ textarea.invalid{border-color:var(--orange)!important;}
 .empty-state{text-align:center;padding:44px;color:var(--text3);font-size:13px;}
 @media(max-width:960px){.emp-layout,.submissions-grid{grid-template-columns:1fr;}}
 @media(max-width:640px){.metrics-row{grid-template-columns:1fr 1fr;}.row3{grid-template-columns:1fr 1fr;}.header{padding:0 14px;}.view{padding:16px;}.lookup-bar{flex-direction:column;}}
+
+  /* ─── MIC BUTTON ─────────────────────────── */
+.mic-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--navy2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font);
+}
+.mic-btn:hover { background: var(--border); }
+.mic-btn.listening {
+  background: #FFF0EC;
+  border-color: #FCA5A5;
+  color: #B91C1C;
+  animation: pulse-mic 1.5s infinite;
+}
+@keyframes pulse-mic {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+  
+  
 </style>
 </head>
 <body>
@@ -420,10 +448,21 @@ textarea.invalid{border-color:var(--orange)!important;}
               <div><div class="section-bar-text">Your Concern</div><div class="section-bar-sub">Category assigned automatically by AI</div></div>
             </div>
             <div class="field">
-              <div class="field-label">Describe your concern <span class="req">*</span></div>
+              <div class="field-label" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Describe your concern <span class="req">*</span></span>
+                <button id="micBtn" type="button" class="mic-btn" onclick="toggleDictation()" title="Click to speak">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+                  <span id="micText" style="margin-left:4px;font-size:11px;font-weight:600;">Dictate</span>
+                </button>
+              </div>
               <textarea id="concern" rows="7" placeholder="Describe your concern in detail — dates, context, any prior steps taken..." oninput="onConcernInput()"></textarea>
               <div class="field-error" id="errConcern">Min. 30 characters required</div>
             </div>
+            <!-- <div class="field">
+              <div class="field-label">Describe your concern <span class="req">*</span></div>
+              <textarea id="concern" rows="7" placeholder="Describe your concern in detail — dates, context, any prior steps taken..." oninput="onConcernInput()"></textarea>
+              <div class="field-error" id="errConcern">Min. 30 characters required</div>
+            </div> -->
             <div class="field">
               <div id="confToggle" class="conf-toggle" onclick="toggleConfidential()">
                 <div class="conf-cb"><svg class="conf-chk" width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 5.5L4.5 8L9 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -983,6 +1022,96 @@ function renderAIResult(r){
     <div class="llm-insight"><div class="insight-label">AI Summary</div><div>${r.summary}</div></div>
     <div class="llm-insight"><div class="insight-label">Recommendation</div><div>${r.recommendation}</div></div>`;
 }
+
+  /* ─── DICTATION (VOICE TO TEXT) ────────────── */
+let recognition;
+let isListening = false;
+
+function initDictation() {
+  // Check for cross-browser Web Speech API support
+  window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  if (!window.SpeechRecognition) {
+    const micBtn = document.getElementById('micBtn');
+    if(micBtn) micBtn.style.display = 'none'; // Hide gracefully if unsupported
+    return;
+  }
+  
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;       // Keep listening until stopped
+  recognition.interimResults = true;   // Show words as they are being spoken
+  
+  let finalTranscript = '';
+
+  recognition.onstart = function() {
+    isListening = true;
+    document.getElementById('micBtn').classList.add('listening');
+    document.getElementById('micText').textContent = 'Listening... Stop';
+    
+    // Keep whatever text is already in the box
+    finalTranscript = document.getElementById('concern').value; 
+    if(finalTranscript.length > 0 && !finalTranscript.endsWith(' ')) {
+        finalTranscript += ' '; // Add space before appending new words
+    }
+  };
+
+  recognition.onresult = function(event) {
+    let interimTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript + ' ';
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
+    }
+    
+    // Update the textarea live
+    document.getElementById('concern').value = finalTranscript + interimTranscript;
+    
+    // Trigger the AI screening while they are speaking!
+    onConcernInput(); 
+  };
+
+  recognition.onerror = function(event) {
+    console.error("Microphone error:", event.error);
+    if(event.error !== 'no-speech') showToast('Microphone error: ' + event.error);
+    stopDictation();
+  };
+
+  recognition.onend = function() {
+    // If the browser auto-stops after silence, reset the UI
+    stopDictation();
+  };
+}
+
+function toggleDictation() {
+  if (!recognition) initDictation();
+  if (!recognition) return; 
+
+  if (isListening) {
+    stopDictation();
+  } else {
+    recognition.start();
+  }
+}
+
+function stopDictation() {
+  isListening = false;
+  if(recognition) recognition.stop();
+  const btn = document.getElementById('micBtn');
+  if(btn) {
+      btn.classList.remove('listening');
+      document.getElementById('micText').textContent = 'Dictate';
+  }
+}
+
+// Check support as soon as the page loads so we can hide the button if needed
+document.addEventListener("DOMContentLoaded", () => {
+  window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!window.SpeechRecognition) {
+    document.getElementById('micBtn').style.display = 'none';
+  }
+});
 
 /* ─── FORM VALIDATION ──────────────────────── */
 function validateForm(){
