@@ -356,7 +356,7 @@ textarea.invalid{border-color:var(--orange)!important;}
     <div class="modal-footer"><button class="action-btn" onclick="closeModals()">Cancel</button><button class="action-btn grad" onclick="sendResponse()">Open in Mail Client</button></div>
   </div>
 
-  <div class="modal-box" id="modalRole">
+ <!-- <div class="modal-box" id="modalRole">
     <div class="modal-header"><span class="modal-title" id="modalRoleTitle">Add User Role</span><button class="modal-close" onclick="closeModals()">×</button></div>
     <div class="modal-body">
       <div class="field"><div class="field-label">Email Address</div><input type="email" id="roleEmail" placeholder="user@adaniconnex.com"/></div>
@@ -365,6 +365,33 @@ textarea.invalid{border-color:var(--orange)!important;}
       </div>
     </div>
     <div class="modal-footer"><button class="action-btn" onclick="closeModals()">Cancel</button><button class="action-btn grad" onclick="saveRole()">Save</button></div>
+  </div> -->
+  
+  <div class="modal-box" id="modalRole">
+    <div class="modal-header"><span class="modal-title" id="modalRoleTitle">Add User Role</span><button class="modal-close" onclick="closeModals()">×</button></div>
+    <div class="modal-body">
+      <div class="field"><div class="field-label">Full Name</div><input type="text" id="roleName" placeholder="Rajiv Patel"/></div>
+      <div class="row2">
+        <div class="field"><div class="field-label">Employee ID</div><input type="text" id="roleEmpId" placeholder="ACX-1042"/></div>
+        <div class="field"><div class="field-label">Department</div>
+          <select id="roleDept">
+            <option value="Engineering">Engineering</option>
+            <option value="Data Centre Operations">Data Centre Operations</option>
+            <option value="HR">HR</option>
+            <option value="Finance">Finance</option>
+            <option value="Management">Management</option>
+            <option value="Sales & Business Dev">Sales & Business Dev</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><div class="field-label">Email Address (Login ID)</div><input type="email" id="roleEmail" placeholder="user@adaniconnex.com"/></div>
+        <div class="field"><div class="field-label">Role</div>
+          <select id="roleSelect"><option value="employee">Employee</option><option value="ceo">CEO</option><option value="master">Master Admin</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="action-btn" onclick="closeModals()">Cancel</button><button class="action-btn grad" onclick="saveRole()" id="saveRoleBtn">Save User</button></div>
   </div>
 
 </div>
@@ -1415,15 +1442,15 @@ function renderRoleList(){
     return `<div class="role-row"><span class="role-email">${r.email}</span><span class="role-badge ${cls}">${r.role}</span><div class="role-actions"><button class="action-btn" style="font-size:11px;padding:4px 9px;" onclick="openRoleModal('${r.id}')">Edit</button><button class="action-btn danger" style="font-size:11px;padding:4px 9px;" onclick="deleteRole('${r.id}')">Remove</button></div></div>`;
   }).join('');
 }
-function openRoleModal(id){
+/* function openRoleModal(id){
   editingRoleId=id;
   const r=id?roles.find(x=>x.id===id):null;
   document.getElementById('modalRoleTitle').textContent=id?'Edit Role':'Add User Role';
   document.getElementById('roleEmail').value=r?r.email:'';
   document.getElementById('roleSelect').value=r?r.role:'employee';
   openModal('role');
-}
-async function saveRole(){
+} */
+/* async function saveRole(){
   const email=document.getElementById('roleEmail').value.trim().toLowerCase();
   const role=document.getElementById('roleSelect').value;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showToast('Invalid email');return;}
@@ -1434,7 +1461,72 @@ async function saveRole(){
     }catch(e){showToast('DB error: '+e.message);return;}
   }else{if(editingRoleId){const idx=roles.findIndex(r=>r.id===editingRoleId);if(idx>=0)roles[idx]={...roles[idx],email,role};}else roles.push({id:String(Date.now()),email,role});}
   closeModals();renderRoleList();showToast('Role saved');
+} */
+
+  function openRoleModal(id){
+  editingRoleId = id;
+  const r = id ? roles.find(x => x.id === id) : null;
+  
+  document.getElementById('modalRoleTitle').textContent = id ? 'Edit User' : 'Add New User';
+  document.getElementById('saveRoleBtn').textContent = id ? 'Save Changes' : 'Save User';
+  
+  // Populate fields
+  document.getElementById('roleEmail').value = r ? (r.email || '') : '';
+  document.getElementById('roleSelect').value = r ? (r.role || 'employee') : 'employee';
+  document.getElementById('roleName').value = r ? (r.name || '') : '';
+  document.getElementById('roleEmpId').value = r ? (r.employeeId || '') : '';
+  document.getElementById('roleDept').value = r ? (r.department || 'Engineering') : 'Engineering';
+  
+  openModal('role');
 }
+
+async function saveRole(){
+  const email = document.getElementById('roleEmail').value.trim().toLowerCase();
+  const role = document.getElementById('roleSelect').value;
+  const name = document.getElementById('roleName').value.trim();
+  const empId = document.getElementById('roleEmpId').value.trim();
+  const dept = document.getElementById('roleDept').value;
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showToast('Invalid email'); return; }
+  if(!name || !empId) { showToast('Please provide Name and Employee ID'); return; }
+
+  const btn = document.getElementById('saveRoleBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  if(window._fb){
+    try{
+      if(editingRoleId){
+        // UPDATE EXISTING USER
+        await window._fb.updateDoc(window._fb.doc(window._fb.db, 'users', editingRoleId), {
+          email, role, name, employeeId: empId, department: dept
+        });
+        
+        const idx = roles.findIndex(r => r.id === editingRoleId);
+        if(idx >= 0) roles[idx] = { ...roles[idx], email, role, name, employeeId: empId, department: dept };
+        showToast('User updated successfully');
+
+      } else {
+        // CREATE NEW USER (Firestore Database Only)
+        const newUserObj = { email, role, name, employeeId: empId, department: dept };
+        const ref = await window._fb.addDoc(window._fb.collection(window._fb.db, 'users'), newUserObj);
+        
+        roles.push({ id: ref.id, ...newUserObj });
+        showToast('Saved! Remember to manually add this email in Firebase Authentication.');
+      }
+    }catch(e){
+      showToast('Error: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = editingRoleId ? 'Save Changes' : 'Save User';
+      return;
+    }
+  }
+  
+  btn.disabled = false;
+  closeModals();
+  renderRoleList();
+}
+  
 async function deleteRole(id){
   if(!confirm('Remove this role?'))return;
   if(window._fb)try{await window._fb.deleteDoc(window._fb.doc(window._fb.db,'users',id));}catch(e){showToast('Error');return;}
