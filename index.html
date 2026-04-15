@@ -774,7 +774,7 @@ function showLoginMsg(msg,cls){
   const el=document.getElementById('loginMsg');
   el.textContent=msg;el.className='login-msg '+(cls||'');
 }
-function enterPortal(user){
+/* function enterPortal(user){
   if (!user || !user.role) {
   showToast("Invalid user role");
   logout();
@@ -807,6 +807,47 @@ function enterPortal(user){
   loadUserNotifs(user.email);
   loadHistory();
 }
+}
+*/
+  function enterPortal(user){
+
+  currentUser = user;
+  
+  if (!user || !user.role) {
+    showToast("Invalid user role");
+    logout();
+    return;
+  }
+
+  document.getElementById('loginPage').style.display='none';
+  const shell=document.getElementById('appShell');shell.style.display='flex';
+  
+  // user pill
+  document.getElementById('userPill').style.display='flex';
+  document.getElementById('userEmail').textContent=user.email;
+  document.getElementById('userRoleBadge').textContent=user.role;
+  
+  // build nav
+  const nav=document.getElementById('headerNav');nav.innerHTML='';
+  
+  if(user.role==='master'){
+    addNav(nav,'Admin','master');addNav(nav,'CEO View','ceo');addNav(nav,'Employee View','employee');
+    switchView('master');loadRoles();renderTeamMgmt();loadMasterStats();
+  } else if(user.role==='ceo'){
+    addNav(nav,'Dashboard','ceo');switchView('ceo');loadFromFirebase();
+  } else {
+    addNav(nav,'Submit Concern','employee');
+    document.getElementById('notifBell').style.display='block';
+    switchView('employee');
+
+    // ✅ AUTO-FILL USER DETAILS
+    document.getElementById('empEmail').value = user.email || '';
+    document.getElementById('empName').value = user.name || '';
+    document.getElementById('empId').value = user.employeeId || '';
+    document.getElementById('dept').value = user.department || '';
+
+    loadUserNotifs(user.email);
+  }
 }
 function addNav(container,label,view){
   const btn=document.createElement('button');btn.className='nav-btn';btn.textContent=label;
