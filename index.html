@@ -614,21 +614,21 @@ import {
   getFirestore, addDoc, collection, getDocs, doc, updateDoc, deleteDoc,
   query, where
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
+/*
 import { 
   getAuth, 
   signInWithEmailAndPassword 
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-  
+ */ 
 const cfg={apiKey:"AIzaSyAFI1pnY6tmspDm3azElhhDvMLmSwRkHeo",authDomain:"ceo-voice-portal.firebaseapp.com",projectId:"ceo-voice-portal",storageBucket:"ceo-voice-portal.firebasestorage.app",messagingSenderId:"912738251809",appId:"1:912738251809:web:cd105809ba0012cf1d1f60"};
 const app = initializeApp(cfg);   // initialize app
 
 const db = getFirestore(app);     // create Firestore
-const auth = getAuth(app);        // attach auth to app
+//const auth = getAuth(app);        // attach auth to app
 
-window._fb = {
+/*window._fb = {
   db,
   auth,
   addDoc,
@@ -640,9 +640,21 @@ window._fb = {
   query,
   where,
   signIn: signInWithEmailAndPassword
+};*/
+
+  window._fb = {
+  db,
+  addDoc,
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where
 };
 
-  onAuthStateChanged(auth, async (user) => {
+ /* onAuthStateChanged(auth, async (user) => {
   if (!user) return;
 
   try {
@@ -672,6 +684,7 @@ window._fb = {
     console.error("Auto login error", e);
   }
 });
+*/
   
 document.dispatchEvent(new CustomEvent('fb-ready'));
 </script>
@@ -770,9 +783,10 @@ async function loadUserNotifs(email){
 }
 
 /* ─── AUTH ─────────────────────────────────── */
-async function doLogin() {
-  const email = "feny@adani.com" /*document.getElementById('loginEmail').value.trim();*/
-  const password = "feny@1234" /*document.getElementById('loginPassword').value;*/
+/*
+  async function doLogin() {
+  const email = "feny@adani.com" //document.getElementById('loginEmail').value.trim();
+  const password = "feny@1234" //document.getElementById('loginPassword').value;
 
   if (!email || !password) {
     showLoginMsg("Enter email & password", "err");
@@ -782,7 +796,7 @@ async function doLogin() {
   const btn = document.getElementById('loginBtn');
   btn.disabled = true;
   showLoginMsg("Logging in...", "info");
-/*
+
   try {
     // 🔐 Step 1: Firebase Authentication
     const userCred = await window._fb.signIn(
@@ -825,7 +839,7 @@ async function doLogin() {
       department: userData.department,
       employeeId: userData.employeeId
     };
-*/
+
     // 🚀 Load UI
     enterPortal(currentUser);
 
@@ -835,6 +849,58 @@ async function doLogin() {
 
   btn.disabled = false;
 }
+*/
+
+
+  function doLogin() {
+
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+
+  //HARD-CODED USERS
+  const users = [
+    {
+      email: "employee@adani.com",
+      password: "employee123",
+      role: "employee",
+      name: "Rahul Sharma",
+      employeeId: "ACX-1042",
+      department: "Engineering"
+    },
+    {
+      email: "ceo@adani.com",
+      password: "ceo123",
+      role: "ceo",
+      name: "CEO User",
+      employeeId: "CEO-001",
+      department: "Management"
+    },
+    {
+      email: "admin@adani.com",
+      password: "admin123",
+      role: "master",
+      name: "Master Admin",
+      employeeId: "ADM-001",
+      department: "Management"
+    }
+  ];
+
+  const user = users.find(
+    u => u.email === email && u.password === password
+  );
+
+  if (!user) {
+    showLoginMsg("Invalid email or password", "err");
+    return;
+  }
+
+  currentUser = user;
+
+  showLoginMsg("Login successful", "info");
+
+  enterPortal(currentUser);
+}
+
   
 function showLoginMsg(msg,cls){
   const el=document.getElementById('loginMsg');
@@ -919,6 +985,7 @@ function addNav(container,label,view){
   const btn=document.createElement('button');btn.className='nav-btn';btn.textContent=label;
   btn.dataset.view=view;btn.onclick=()=>switchView(view);container.appendChild(btn);
 }
+  /*
 function logout(){
   if (window._fb?.auth) {
     window._fb.auth.signOut(); // 🔥 important
@@ -941,7 +1008,26 @@ function logout(){
   const btn = document.getElementById('loginBtn');
   btn.disabled = false;
 }  
+*/
 
+function logout(){
+
+  currentUser = null;
+
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+
+  const msg = document.getElementById('loginMsg');
+  msg.textContent = '';
+  msg.className = 'login-msg';
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = false;
+}
+  
 /* ─── ROUTING ──────────────────────────────── */
 function switchView(v){
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
