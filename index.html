@@ -771,8 +771,8 @@ async function loadUserNotifs(email){
 
 /* ─── AUTH ─────────────────────────────────── */
 async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
+  const email = "feny@adani.com" /*document.getElementById('loginEmail').value.trim();*/
+  const password = "feny@1234" /*document.getElementById('loginPassword').value;*/
 
   if (!email || !password) {
     showLoginMsg("Enter email & password", "err");
@@ -782,7 +782,7 @@ async function doLogin() {
   const btn = document.getElementById('loginBtn');
   btn.disabled = true;
   showLoginMsg("Logging in...", "info");
-
+/*
   try {
     // 🔐 Step 1: Firebase Authentication
     const userCred = await window._fb.signIn(
@@ -825,7 +825,7 @@ async function doLogin() {
       department: userData.department,
       employeeId: userData.employeeId
     };
-
+*/
     // 🚀 Load UI
     enterPortal(currentUser);
 
