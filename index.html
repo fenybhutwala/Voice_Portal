@@ -715,7 +715,7 @@ const DEFAULT_TEAM=[
 teamMembers=[...DEFAULT_TEAM];
 
 /* ─── FIREBASE ─────────────────────────────── */
-
+/*
   async function loadApiKey() {
   try {
     const snap = await window._fb.getDocs(
@@ -736,9 +736,12 @@ teamMembers=[...DEFAULT_TEAM];
     console.error("Error loading API key", e);
   }
 }
-  
-document.addEventListener('fb-ready',()=>{loadRoles();loadTeam();loadApiKey(); });
+ */ 
+document.addEventListener('fb-ready',()=>{loadRoles();loadTeam();
+                                         // loadApiKey();
+                                         });
 
+  
 async function loadRoles(){
   if(!window._fb)return;
   try{
@@ -1074,7 +1077,7 @@ function onConcernInput(){
 function showSkeleton(){
   document.getElementById('aiPanel').innerHTML='<div style="padding:8px 0;"><div class="skeleton" style="width:55%;height:10px;"></div><div class="skeleton" style="width:90%;"></div><div class="skeleton" style="width:70%;"></div><div class="skeleton" style="width:40%;height:10px;margin-top:14px;"></div><div class="skeleton" style="width:85%;"></div><div class="skeleton" style="width:65%;"></div></div>';
 }
-async function analyzeWithAI(text){
+/* async function analyzeWithAI(text){
   const dept=document.getElementById('dept').value||'Not specified';
   const prompt=`You are an AI screening system for AdaniConneX's Employee Voice Portal — a direct channel to the CEO for serious workplace concerns. Return ONLY valid JSON.
 
@@ -1109,6 +1112,173 @@ Return: {"filteredOut":bool,"filterReason":"string or null","category":"...","se
     const r=JSON.parse(m[0]);lastAnalysis=r;renderAIResult(r);
   }catch(e){document.getElementById('aiPanel').innerHTML=`<div class="error-msg">AI error: ${e.message}</div>`;}
 }
+*/
+//static AI Analysis function
+  async function analyzeWithAI(text){
+
+  const t = text.toLowerCase();
+
+  // ─────────────────────────────
+  // FILTERING RULES
+  // ─────────────────────────────
+
+  const blockedKeywords = [
+    'salary',
+    'bonus',
+    'leave',
+    'vacation',
+    'payslip',
+    'reimbursement',
+    'appraisal',
+    'increment'
+  ];
+
+  const isBlocked = blockedKeywords.some(k => t.includes(k));
+
+  if(isBlocked){
+
+    const r = {
+      filteredOut: true,
+      filterReason: 'This concern appears to be HR/helpdesk related and not meant for CEO escalation.'
+    };
+
+    lastAnalysis = r;
+    renderAIResult(r);
+    return;
+  }
+
+  // ─────────────────────────────
+  // DEFAULT VALUES
+  // ─────────────────────────────
+
+  let category = 'Workplace Culture';
+  let severityScore = 45;
+  let severityLabel = 'Medium';
+  let sentimentScore = -0.2;
+  let sentimentLabel = 'Mixed';
+  let routeTo = 'CEO';
+  let tags = ['employee voice'];
+  let summary = 'Employee raised an organizational concern.';
+  let recommendation = 'Review and assess leadership intervention needs.';
+
+  // ─────────────────────────────
+  // CATEGORY DETECTION
+  // ─────────────────────────────
+
+  if(
+    t.includes('harassment') ||
+    t.includes('discrimination') ||
+    t.includes('bullying')
+  ){
+    category = 'Harassment & Discrimination';
+    severityScore = 92;
+    severityLabel = 'High';
+    routeTo = 'CEO + HR';
+    tags = ['harassment','employee safety'];
+    summary = 'Potential workplace harassment concern detected.';
+    recommendation = 'Immediate HR and leadership review recommended.';
+  }
+
+  else if(
+    t.includes('safety') ||
+    t.includes('hazard') ||
+    t.includes('injury') ||
+    t.includes('fire')
+  ){
+    category = 'Workplace Safety';
+    severityScore = 88;
+    severityLabel = 'High';
+    routeTo = 'CEO';
+    tags = ['safety','risk'];
+    summary = 'Potential workplace safety issue reported.';
+    recommendation = 'Urgent inspection and mitigation recommended.';
+  }
+
+  else if(
+    t.includes('fraud') ||
+    t.includes('corruption') ||
+    t.includes('ethical')
+  ){
+    category = 'Ethical Concern';
+    severityScore = 90;
+    severityLabel = 'High';
+    routeTo = 'CEO + Legal';
+    tags = ['ethics','compliance'];
+    summary = 'Potential ethical or compliance issue identified.';
+    recommendation = 'Legal and leadership review recommended.';
+  }
+
+  else if(
+    t.includes('process') ||
+    t.includes('improvement') ||
+    t.includes('efficiency')
+  ){
+    category = 'Process Improvement';
+    severityScore = 55;
+    severityLabel = 'Medium';
+    routeTo = 'CTO';
+    tags = ['process','improvement'];
+    summary = 'Employee suggested operational improvements.';
+    recommendation = 'Evaluate process optimization opportunities.';
+  }
+
+  else if(
+    t.includes('innovation') ||
+    t.includes('idea') ||
+    t.includes('automation')
+  ){
+    category = 'Innovation Idea';
+    severityScore = 50;
+    severityLabel = 'Medium';
+    routeTo = 'CTO';
+    tags = ['innovation','automation'];
+    summary = 'Innovation proposal submitted.';
+    recommendation = 'Forward to innovation review committee.';
+  }
+
+  // ─────────────────────────────
+  // NEGATIVE SENTIMENT BOOST
+  // ─────────────────────────────
+
+  if(
+    t.includes('urgent') ||
+    t.includes('serious') ||
+    t.includes('critical')
+  ){
+    severityScore += 5;
+  }
+
+  if(severityScore >= 80){
+    severityLabel = 'High';
+  } else if(severityScore >= 40){
+    severityLabel = 'Medium';
+  } else {
+    severityLabel = 'Low';
+  }
+
+  // ─────────────────────────────
+  // FINAL RESPONSE
+  // ─────────────────────────────
+
+  const r = {
+    filteredOut: false,
+    category,
+    severityScore,
+    severityLabel,
+    sentimentScore,
+    sentimentLabel,
+    relevance: 'Relevant',
+    routeTo,
+    tags,
+    summary,
+    recommendation
+  };
+
+  lastAnalysis = r;
+
+  renderAIResult(r);
+}
+  
 function renderAIResult(r){
   if(r.filteredOut){
     document.getElementById('submitBtn').disabled=true;
